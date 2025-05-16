@@ -1,18 +1,149 @@
 import sys
 import os
+import json
+from datetime import datetime
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, QLabel, 
                              QLineEdit, QPushButton, QFileDialog, QTextEdit, QMessageBox,
-                             QHBoxLayout, QDialog, QMenuBar, QMenu, QStatusBar, QAction)
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
+                             QHBoxLayout, QDialog, QMenuBar, QMenu, QStatusBar, QAction,
+                             QColorDialog, QSpinBox, QFormLayout, QGroupBox)
+from PyQt5.QtCore import Qt, QTimer, QSettings
+from PyQt5.QtGui import QColor, QPalette
 from git import Repo, GitCommandError
 from github import Github, GithubException
+
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("设置")
+        self.setGeometry(300, 300, 500, 400)
+        
+        self.parent = parent
+        self.settings = QSettings("GitHubUploader", "AppSettings")
+        
+        self.initUI()
+        self.load_settings()
+    
+    def initUI(self):
+        layout = QVBoxLayout()
+        
+        # 主题设置组
+        theme_group = QGroupBox("主题设置")
+        theme_layout = QFormLayout()
+        
+        self.primary_color_btn = QPushButton("选择主颜色")
+        self.primary_color_btn.clicked.connect(lambda: self.choose_color("primary"))
+        self.secondary_color_btn = QPushButton("选择次颜色")
+        self.secondary_color_btn.clicked.connect(lambda: self.choose_color("secondary"))
+        self.text_color_btn = QPushButton("选择文本颜色")
+        self.text_color_btn.clicked.connect(lambda: self.choose_color("text"))
+        
+        theme_layout.addRow("主颜色:", self.primary_color_btn)
+        theme_layout.addRow("次颜色:", self.secondary_color_btn)
+        theme_layout.addRow("文本颜色:", self.text_color_btn)
+        
+        self.reset_theme_btn = QPushButton("重置为默认主题")
+        self.reset_theme_btn.clicked.connect(self.reset_theme)
+        theme_layout.addRow(self.reset_theme_btn)
+        
+        theme_group.setLayout(theme_layout)
+        layout.addWidget(theme_group)
+        
+        # 自动保存组
+        save_group = QGroupBox("自动保存设置")
+        save_layout = QFormLayout()
+        
+        self.auto_save_checkbox = QPushButton("启用自动保存")
+        self.auto_save_checkbox.setCheckable(True)
+        self.auto_save_checkbox.clicked.connect(self.toggle_auto_save)
+        
+        self.save_interval_spin = QSpinBox()
+        self.save_interval_spin.setRange(1, 60)
+        self.save_interval_spin.setSuffix(" 分钟")
+        self.save_interval_spin.valueChanged.connect(self.update_save_interval)
+        
+        save_layout.addRow("自动保存:", self.auto_save_checkbox)
+        save_layout.addRow("保存间隔:", self.save_interval_spin)
+        
+        save_group.setLayout(save_layout)
+        layout.addWidget(save_group)
+        
+        # 按钮
+        button_layout = QHBoxLayout()
+        self.save_btn = QPushButton("保存设置")
+        self.save_btn.clicked.connect(self.save_settings)
+        self.cancel_btn = QPushButton("取消")
+        self.cancel_btn.clicked.connect(self.close)
+        
+        button_layout.addWidget(self.save_btn)
+        button_layout.addWidget(self.cancel_btn)
+        layout.addLayout(button_layout)
+        
+        self.setLayout(layout)
+    
+    def load_settings(self):
+        # 加载颜色设置
+        self.primary_color = self.settings.value("theme/primary", QColor(48, 167, 69))
+        self.secondary_color = self.settings.value("theme/secondary", QColor(3, 102, 214))
+        self.text_color = self.settings.value("theme/text", QColor(0, 0, 0))
+        
+        # 加载自动保存设置
+        auto_save = self.settings.value("auto_save/enabled", False, type=bool)
+        self.auto_save_checkbox.setChecked(auto_save)
+        self.auto_save_checkbox.setText("启用自动保存" if auto_save else "禁用自动保存")
+        
+        save_interval = self.settings.value("auto_save/interval", 5, type=int)
+        self.save_interval_spin.setValue(save_interval)
+    
+    def choose_color(self, color_type):
+        color = QColorDialog.getColor()
+        if color.isValid():
+            if color_type == "primary":
+                self.primary_color = color
+            elif color_type == "secondary":
+                self.secondary_color = color
+            elif color_type == "text":
+                self.text_color = color
+    
+    def reset_theme(self):
+        self.primary_color = QColor(48, 167, 69)  # GitHub 绿色
+        self.secondary_color = QColor(3, 102, 214)  # GitHub 蓝色
+        self.text_color = QColor(0, 0, 0)  # 黑色
+    
+    def toggle_auto_save(self):
+        checked = self.auto_save_checkbox.isChecked()
+        self.auto_save_checkbox.setText("启用自动保存" if checked else "禁用自动保存")
+    
+    def update_save_interval(self, value):
+        pass  # 值改变时自动处理
+    
+    def save_settings(self):
+        # 保存颜色设置
+        self.settings.setValue("theme/primary", self.primary_color)
+        self.settings.setValue("theme/secondary", self.secondary_color)
+        self.settings.setValue("theme/text", self.text_color)
+        
+        # 保存自动保存设置
+        self.settings.setValue("auto_save/enabled", self.auto_save_checkbox.isChecked())
+        self.settings.setValue("auto_save/interval", self.save_interval_spin.value())
+        
+        # 应用新主题
+        self.parent.apply_theme(
+            self.primary_color,
+            self.secondary_color,
+            self.text_color
+        )
+        
+        # 更新自动保存定时器
+        self.parent.setup_auto_save()
+        
+        QMessageBox.information(self, "成功", "设置已保存")
+        self.close()
 
 class HelpDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("使用帮助")
-        self.setGeometry(300, 300, 800, 600)  # 增大帮助窗口尺寸
+        self.setGeometry(300, 300, 800, 600)
         
         layout = QVBoxLayout()
         
@@ -57,7 +188,6 @@ class HelpDialog(QDialog):
             <li>如果文件夹不是 Git 仓库，工具会自动初始化</li>
             <li>上传大量文件可能需要较长时间</li>
             <li>确保网络连接正常</li>
-            <li>建议定期更新您的访问令牌</li>
         </ul>
         
         <div style="margin-top: 30px; padding: 15px; background-color: #f6f8fa; border-radius: 5px;">
@@ -69,7 +199,7 @@ class HelpDialog(QDialog):
             <p>A: GitHub 限制单个文件不超过 100MB，仓库总大小不超过 1GB（免费账户）。</p>
         </div>
         
-        <p style="color: #586069; font-style: italic; margin-top: 20px;">版本 0.3 | 如有问题，请联系开发者。</p>
+        <p style="color: #586069; font-style: italic; margin-top: 20px;">版本 0.4 | 如有问题，请联系开发者。</p>
         """)
         
         close_button = QPushButton("关闭帮助")
@@ -94,12 +224,27 @@ class GitHubUploader(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("GitHub 自动上传工具")
-        self.setGeometry(100, 100, 1200, 800)  # 增大主窗口尺寸
+        self.setGeometry(100, 100, 1200, 800)
+        
+        # 初始化设置
+        self.settings = QSettings("GitHubUploader", "AppSettings")
+        self.auto_save_timer = QTimer()
+        self.last_save_time = None
+        
+        # 初始化UI组件
+        self.token_input = QLineEdit()
+        self.repo_input = QLineEdit()
+        self.folder_path = QLineEdit()
+        self.commit_input = QLineEdit()
+        self.log_output = QTextEdit()
         
         self.initUI()
+        self.load_settings()
+        self.setup_auto_save()
+        
         self.repo = None
         self.gh = None
-        
+    
     def initUI(self):
         # 创建菜单栏
         self.createMenuBar()
@@ -113,7 +258,6 @@ class GitHubUploader(QMainWindow):
         
         # GitHub 令牌输入
         self.token_label = QLabel("GitHub 个人访问令牌:")
-        self.token_input = QLineEdit()
         self.token_input.setPlaceholderText("输入您的 GitHub 个人访问令牌")
         self.token_input.setMinimumHeight(35)
         main_layout.addWidget(self.token_label)
@@ -121,7 +265,6 @@ class GitHubUploader(QMainWindow):
         
         # 仓库信息
         self.repo_label = QLabel("GitHub 仓库 (格式: 用户名/仓库名):")
-        self.repo_input = QLineEdit()
         self.repo_input.setPlaceholderText("例如: yourusername/yourrepo")
         self.repo_input.setMinimumHeight(35)
         main_layout.addWidget(self.repo_label)
@@ -129,7 +272,6 @@ class GitHubUploader(QMainWindow):
         
         # 本地文件夹选择
         self.folder_label = QLabel("本地文件夹:")
-        self.folder_path = QLineEdit()
         self.folder_path.setReadOnly(True)
         self.folder_path.setMinimumHeight(35)
         
@@ -146,7 +288,6 @@ class GitHubUploader(QMainWindow):
         
         # 提交信息
         self.commit_label = QLabel("提交信息:")
-        self.commit_input = QLineEdit()
         self.commit_input.setPlaceholderText("输入提交信息")
         self.commit_input.setMinimumHeight(35)
         main_layout.addWidget(self.commit_label)
@@ -171,9 +312,8 @@ class GitHubUploader(QMainWindow):
         
         # 日志输出
         self.log_label = QLabel("操作日志:")
-        self.log_output = QTextEdit()
         self.log_output.setReadOnly(True)
-        self.log_output.setMinimumHeight(300)  # 增大日志区域高度
+        self.log_output.setMinimumHeight(300)
         main_layout.addWidget(self.log_label)
         main_layout.addWidget(self.log_output)
         
@@ -186,6 +326,12 @@ class GitHubUploader(QMainWindow):
         # 文件菜单
         fileMenu = menuBar.addMenu("文件")
         
+        saveAction = QAction("保存设置", self)
+        saveAction.setShortcut("Ctrl+S")
+        saveAction.setStatusTip("保存当前设置")
+        saveAction.triggered.connect(self.manual_save)
+        fileMenu.addAction(saveAction)
+        
         exitAction = QAction("退出", self)
         exitAction.setShortcut("Ctrl+Q")
         exitAction.setStatusTip("退出程序")
@@ -194,6 +340,11 @@ class GitHubUploader(QMainWindow):
         
         # 工具菜单
         toolMenu = menuBar.addMenu("工具")
+        
+        settingsAction = QAction("设置", self)
+        settingsAction.setStatusTip("更改应用程序设置")
+        settingsAction.triggered.connect(self.show_settings)
+        toolMenu.addAction(settingsAction)
         
         clearLogAction = QAction("清除日志", self)
         clearLogAction.setStatusTip("清除操作日志")
@@ -214,20 +365,107 @@ class GitHubUploader(QMainWindow):
         aboutAction.triggered.connect(self.show_about)
         helpMenu.addAction(aboutAction)
     
+    def clear_log(self):
+        """清除日志内容"""
+        self.log_output.clear()
+        self.statusBar().showMessage("日志已清除", 3000)
+    
     def show_about(self):
         QMessageBox.about(self, "关于 GitHub 自动上传工具",
-                         "<b>GitHub 自动上传工具 v0.3</b><br><br>"
+                         "<b>GitHub 自动上传工具 v0.4</b><br><br>"
                          "一个简单的图形界面工具，用于将本地文件上传到 GitHub 仓库。<br><br>"
                          "使用 Python 和 PyQt5 开发<br>"
                          "© 2025 开发者")
     
-    def clear_log(self):
-        self.log_output.clear()
-        self.statusBar().showMessage("日志已清除", 3000)
+    def show_settings(self):
+        settings_dialog = SettingsDialog(self)
+        settings_dialog.exec_()
     
     def show_help(self):
         help_dialog = HelpDialog()
         help_dialog.exec_()
+    
+    def load_settings(self):
+        # 加载主题
+        primary_color = self.settings.value("theme/primary", QColor(48, 167, 69))
+        secondary_color = self.settings.value("theme/secondary", QColor(3, 102, 214))
+        text_color = self.settings.value("theme/text", QColor(0, 0, 0))
+        self.apply_theme(primary_color, secondary_color, text_color)
+        
+        # 加载保存的状态
+        app_state = self.settings.value("app_state")
+        if app_state:
+            try:
+                state = json.loads(app_state)
+                self.token_input.setText(state.get("token", ""))
+                self.repo_input.setText(state.get("repo_path", ""))
+                self.folder_path.setText(state.get("local_path", ""))
+            except json.JSONDecodeError:
+                pass
+    
+    def apply_theme(self, primary_color, secondary_color, text_color):
+        # 应用主题颜色到UI
+        palette = self.palette()
+        
+        # 设置主颜色 (按钮、强调元素)
+        palette.setColor(QPalette.Button, primary_color)
+        palette.setColor(QPalette.Highlight, primary_color)
+        palette.setColor(QPalette.ButtonText, Qt.white)
+        
+        # 设置次颜色 (标题、边框等)
+        palette.setColor(QPalette.WindowText, secondary_color)
+        
+        # 设置文本颜色
+        palette.setColor(QPalette.Text, text_color)
+        palette.setColor(QPalette.WindowText, text_color)
+        
+        self.setPalette(palette)
+        
+        # 更新特定组件的样式
+        self.style().unpolish(self)
+        self.style().polish(self)
+    
+    def setup_auto_save(self):
+        # 停止现有定时器
+        self.auto_save_timer.stop()
+        
+        # 检查是否启用自动保存
+        auto_save_enabled = self.settings.value("auto_save/enabled", False, type=bool)
+        if auto_save_enabled:
+            interval_minutes = self.settings.value("auto_save/interval", 5, type=int)
+            interval_ms = interval_minutes * 60 * 1000  # 转换为毫秒
+            
+            self.auto_save_timer.timeout.connect(self.auto_save)
+            self.auto_save_timer.start(interval_ms)
+            self.statusBar().showMessage(f"自动保存已启用，每 {interval_minutes} 分钟保存一次", 5000)
+    
+    def auto_save(self):
+        self.manual_save(auto=True)
+    
+    def manual_save(self, auto=False):
+        try:
+            # 保存当前状态 (令牌、仓库路径等)
+            settings_to_save = {
+                "token": self.token_input.text(),
+                "repo_path": self.repo_input.text(),
+                "local_path": self.folder_path.text(),
+                "last_updated": datetime.now().isoformat()
+            }
+            
+            # 在实际应用中，您可能想加密敏感数据
+            self.settings.setValue("app_state", json.dumps(settings_to_save))
+            
+            self.last_save_time = datetime.now()
+            
+            if auto:
+                self.statusBar().showMessage(f"设置已自动保存 - {self.last_save_time.strftime('%H:%M:%S')}", 3000)
+            else:
+                self.statusBar().showMessage("设置已手动保存", 3000)
+            
+            return True
+        except Exception as e:
+            self.log_message(f"保存设置时出错: {str(e)}")
+            return False
     
     def browse_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "选择文件夹")
@@ -313,11 +551,31 @@ class GitHubUploader(QMainWindow):
             self.log_message(error_msg)
             QMessageBox.critical(self, "错误", error_msg)
             self.statusBar().showMessage("上传失败: 未知错误", 5000)
+    
+    def closeEvent(self, event):
+        # 关闭前自动保存
+        if self.settings.value("auto_save/enabled", False, type=bool):
+            self.manual_save(auto=True)
+        
+        # 保存窗口大小和位置
+        self.settings.setValue("window/size", self.size())
+        self.settings.setValue("window/position", self.pos())
+        
+        event.accept()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
     
     window = GitHubUploader()
+    
+    # 恢复窗口大小和位置
+    size = window.settings.value("window/size")
+    position = window.settings.value("window/position")
+    if size:
+        window.resize(size)
+    if position:
+        window.move(position)
+    
     window.show()
     sys.exit(app.exec_())
