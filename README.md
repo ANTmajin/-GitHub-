@@ -55,7 +55,14 @@ GitHub 自动上传工具使用指南
 确保网络连接正常 
 如有问题，请联系开发者。
 
-––––––––––––
+------------
+
+### 给开发者的话:
+1.该语言由python开发
+2.
+
+------------
+
 ### Please note that the author used machine translation for English, and the English format has been manually edited and may contain errors.
 ### This is an automated GitHub upload program with a graphical interface, a great tool for enthusiasts!
 
