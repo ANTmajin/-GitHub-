@@ -161,7 +161,54 @@ class HelpDialog(QDialog):
         help_text.setHtml("""
         <h1 style="color: #0366d6;">GitHub 自动上传工具使用指南</h1>
         
-        <!-- 保持原有的帮助内容不变 -->
+        <h2 style="color: #24292e;">1. 准备工作</h2>
+        <p>在使用本工具前，您需要:</p>
+        <ul>
+            <li>拥有一个 GitHub 账号</li>
+            <li>在 GitHub 上创建好仓库</li>
+            <li>生成个人访问令牌 (PAT)</li>
+        </ul>
+        
+        <h2 style="color: #24292e;">2. 获取个人访问令牌</h2>
+        <p>按照以下步骤获取令牌:</p>
+        <ol>
+            <li>登录 GitHub 账户</li>
+            <li>进入 Settings > Developer settings > Personal access tokens</li>
+            <li>点击 "Generate new token"</li>
+            <li>为令牌命名</li>
+            <li>勾选 "repo" 权限</li>
+            <li>点击 "Generate token" 按钮</li>
+            <li>复制生成的令牌 (这是您唯一一次能看到它的机会)</li>
+        </ol>
+        
+        <h2 style="color: #24292e;">3. 使用本工具</h2>
+        <p>操作步骤:</p>
+        <ol>
+            <li>在 "GitHub 个人访问令牌" 字段粘贴您的令牌</li>
+            <li>在 "GitHub 仓库" 字段输入仓库名称 (格式: 用户名/仓库名)</li>
+            <li>点击 "浏览..." 按钮选择本地文件夹</li>
+            <li>在 "提交信息" 字段输入有意义的描述</li>
+            <li>点击 "上传到 GitHub" 按钮</li>
+        </ol>
+        
+        <h2 style="color: #24292e;">4. 注意事项</h2>
+        <ul>
+            <li>令牌相当于密码，请妥善保管</li>
+            <li>如果文件夹不是 Git 仓库，工具会自动初始化</li>
+            <li>上传大量文件可能需要较长时间</li>
+            <li>确保网络连接正常</li>
+        </ul>
+        
+        <div style="margin-top: 30px; padding: 15px; background-color: #f6f8fa; border-radius: 5px;">
+            <h3 style="color: #0366d6;">常见问题</h3>
+            <p><strong>Q: 为什么我的上传失败了？</strong></p>
+            <p>A: 请检查您的令牌是否有效、仓库名称是否正确，以及网络连接是否正常。</p>
+            
+            <p><strong>Q: 我可以上传多大的文件？</strong></p>
+            <p>A: GitHub 限制单个文件不超过 100MB，仓库总大小不超过 1GB（免费账户）。</p>
+        </div>
+        
+        <p style="color: #586069; font-style: italic; margin-top: 20px;">版本 0.5 | 如有问题，请联系开发者。</p>
         """)
         
         close_button = QPushButton("关闭帮助")
@@ -415,7 +462,7 @@ class GitHubUploader(QMainWindow):
     
     def show_about(self):
         QMessageBox.about(self, "关于 GitHub 自动上传工具",
-                         "<b>GitHub 自动上传工具 v1.0</b><br><br>"
+                         "<b>GitHub 自动上传工具 v0.5</b><br><br>"
                          "一个简单的图形界面工具，用于将本地文件上传到 GitHub 仓库。<br><br>"
                          "使用 Python 和 PyQt5 开发<br>"
                          "© 2023 开发者")
