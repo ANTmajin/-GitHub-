@@ -1,9 +1,7 @@
 # GitHub upload tool/GitHub自动保存工具
 
-### (The English translation is at the back.)
-
-------------
 ### 这是一个图形化界面操作自动上传GitHub程序，腐竹的好工具！
+### (The English translation is at the back.)
 
 ------------
 ### 注意此协议为GNU General Public License v2.0
@@ -58,8 +56,8 @@ GitHub 自动上传工具使用指南
 ------------
 
 ### 给开发者的话:
-1.该语言由python开发
-2.
+1.该语言由python开发，这个程序将使用PyQt5作为界面框架，GitPython库来处理Git操作。
+2.安装依赖:pip install PyQt5 GitPython PyGithub
 
 ------------
 
@@ -114,3 +112,9 @@ If the folder is not a Git repository, the tool will automatically initialize it
 Uploading a large number of files may take a long time
 Ensure the network connection is stable
 If there are any issues, please contact the developer.
+
+------------
+
+### A word to developers:
+1. This language is developed by python, and this program will use PyQt5 as the interface framework, and GitPython library handle Git operations.
+2. Install dependencies: pip install PyQt5 GitPython PyGithub
