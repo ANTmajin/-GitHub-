@@ -1,4 +1,8 @@
-# -GitHub-
+# GitHub upload tool/GitHub自动保存工具
+
+### (The English translation is at the back.)
+
+------------
 ### 这是一个图形化界面操作自动上传GitHub程序，腐竹的好工具！
 
 ------------
@@ -49,4 +53,57 @@ GitHub 自动上传工具使用指南
 如果文件夹不是 Git 仓库，工具会自动初始化 
 上传大量文件可能需要较长时间 
 确保网络连接正常 
-如有问题，请联系开发者。 
+如有问题，请联系开发者。
+
+––––––––––––
+### Please note that the author used machine translation for English, and the English format has been manually edited and may contain errors.
+### This is an automated GitHub upload program with a graphical interface, a great tool for enthusiasts!
+
+------------
+### Note that this agreement is under the GNU General Public License v2.0
+### Derivative works must also be open source
+
+------------
+Function Overview
+
+1. Graphical interface operation
+
+2. Connect GitHub account
+
+3. Select/drag and drop local folder
+   
+4. Automatically initialize Git repository (if needed)
+   
+5. Commit changes and push to GitHub
+    
+6. Scheduled save of specified directory
+    
+------------
+How to operate:
+GitHub Automatic Upload Tool User Guide 
+1. Preparation  Before using this tool, you need:
+A GitHub account
+Create a repository on GitHub
+Generate a personal access token (PAT)
+2. Obtain a personal access token
+Follow these steps to obtain the token:
+Log in to your GitHub account
+Go to Settings > Developer settings > Personal access tokens
+Click "Generate new token"
+Name the token
+Check the "repo" permission
+Click the "Generate token" button
+Copy the generated token (this is the only time you'll see it)
+Use this tool
+Operation steps:
+Paste your token in the "GitHub Personal Access Token" field
+Enter the repository name in the "GitHub Repository" field (format: username/repository_name)
+Click the "Browse..." button to select the local folder
+Enter a meaningful description in the "Commit Message" field
+Click the "Upload to GitHub" button
+8. Notes
+The token is like a password, please keep it safe
+If the folder is not a Git repository, the tool will automatically initialize it
+Uploading a large number of files may take a long time
+Ensure the network connection is stable
+If there are any issues, please contact the developer.
