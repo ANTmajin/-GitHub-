@@ -1,0 +1,95 @@
+update version/版本更新:
+(English translation follows）
+v0.1:
+增加功能：
+1.图形化界面操作
+2.连接 GitHub 账户
+3.选择本地文件夹
+4.自动初始化 Git 仓库（如需要）
+5.提交更改并推送到 GitHub
+bug修复:
+无
+
+v0.2:
+增加功能：
+1.在右上角添加一个帮助按钮，点击后会打开一个新窗口显示使用说明
+bug修复:
+无
+
+v0.3:
+增加功能：
+1.添加导航栏并将帮助功能整合进去，同时扩大UI尺寸
+bug修复:
+无
+
+v0.4:
+增加功能：
+1.导航栏增加设置，可以改变主题颜色，并保存设置
+2.增加定时保存功能
+bug修复:
+已修复未被定义的clear_log(v0.4的内测版)
+
+v0.5:
+增加功能：
+1.增加导航栏的颜色的修改
+2.让文件可以拖拽上传
+bug修复:
+导航栏的颜色默认黑色(字体是白的,看不清)
+
+v0.6:
+增加功能：
+1.在设置中加入语言菜单，可以切换中文与英文，默认为中文；帮助的内容也可以切换语言
+bug修复:
+无
+
+v0.7:
+增加功能：
+无
+bug修复:
+修复菜单切换语言后未被刷新的bug
+
+-------------------------------------------------------------------------------------------------------------
+English：
+v0.1:
+Added features:
+1. Graphical interface operation
+2. Connect GitHub account
+3. Select local folder
+. Auto initialize Git repository (if needed)
+5. Commit changes and push to GitHub
+Bug fixes:
+None
+
+v0.2:
+Added features:1. Add a help button in the top right corner, which will open a new window with usage instructions when clicked
+Bug fixes:
+None
+
+v0.3
+Added features:
+1. Add navigation bar and integrate help function into it, and expand the UI size
+Bug fixes:
+None
+
+v0.4:Added features:
+1. Add settings in the navigation bar, which can change the theme color and save the settings
+2. Add a scheduled save function
+Bug fixes:Fixed the clear_log that was not defined (in the v0.4 beta version)
+
+v0.5:
+Added features:
+1. Add the modification navigation bar color
+2. Allow file drag and drop upload
+Bug fixes:
+The color of the navigation bar is black by default (font is white, not readable)
+v0.6:
+Added features:
+1. Add a language menu in settings, which can switch between Chinese and English, default to Chinese; help content can also languages
+Bug fixes:
+None
+
+v0.7:
+Added features:
+None
+Bug fixes:
+Fix the bug that the language is not refreshed switching in the menu
