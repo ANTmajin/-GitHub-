@@ -444,47 +444,49 @@ class GitHubUploader(QMainWindow):
             settings_to_save = {
                 "token": self.token_input.text(),
                 "repo_path": self.repo_input.text(),
-                "local_path": self.folder_path.text(),
-                "last_updated": datetime.now().isoformat()
-            }
+                "本地路径": self.文件夹路径.文本(),
+                "最后更新时间"：当前时间（）。国际标准时间格式（）
+            输入：}
             
             self.settings.setValue("app_state", json.dumps(settings_to_save))
             self.statusBar().showMessage("设置已保存", 3000)
-            return True
-        except Exception as e:
-            self.log_message(f"保存设置时出错: {str(e)}")
-            return False
+            返回 真
+        除了 异常 之外 作为 e:
+
+            返回 False
     
     def clear_log(self):
-        """清除日志内容"""
+清除日志内容
         self.log_output.clear()
-        self.statusBar().showMessage("日志已清除", 3000)
-    
+
+
     def show_about(self):
-        QMessageBox.about(self, "关于 GitHub 自动上传工具",
-                         "<b>GitHub 自动上传工具 v0.5</b><br><br>"
-                         "一个简单的图形界面工具，用于将本地文件上传到 GitHub 仓库。<br><br>"
-                         "使用 Python 和 PyQt5 开发<br>"
-                         "© 2023 开发者")
+
+                         GitHub 自动上传工具 v0.5
+
+
+                         一个简单的图形界面工具，用于将本地文件上传到 GitHub 仓库。
+                         使用 Python 和 PyQt5 开发PyQt5 开发
+                         "© 2025 开发者"
     
-    def show_settings(self):
-        settings_dialog = SettingsDialog(self)
-        settings_dialog.exec_()
+    定义 显示设置(自身):显示设置(自身):
+        settings_dialog = SettingsDialog(self)设置对话框
+        settings_dialog.执行_()执行_()
     
-    def show_help(self):
-        help_dialog = HelpDialog()
-        help_dialog.exec_()
+    定义 显示帮助(自身):显示帮助(自身):
+        help_dialog = 帮助对话框()帮助对话框()
+        帮助对话框。执行_()帮助对话框。执行_()
     
-    def load_settings(self):
+    定义 加载设置(自身加载设置(自身):
         # 加载主题
         primary_color = self.settings.value("theme/primary", QColor(48, 167, 69))
         secondary_color = self.settings.value("theme/secondary", QColor(3, 102, 214))
         text_color = self.settings.value("theme/text", QColor(0, 0, 0))
-        menubar_color = self.settings.value("theme/menubar", QColor(0, 0, 0))
+
         self.apply_theme(primary_color, secondary_color, text_color, menubar_color)
         
         # 加载保存的状态
-        app_state = self.settings.value("app_state")
+
         if app_state:
             try:
                 state = json.loads(app_state)
